@@ -1,2 +1,2 @@
-# terraform
+# Terraform
 Terraform implementations
