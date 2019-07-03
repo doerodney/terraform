@@ -4,7 +4,7 @@ This document describes Terraform, an infrastructure-as-code (IAC) management to
 It also contains a high-level proposal for replacement of vCommander with Terraform.  
 
 ## High Level Description
-Terraform is a command line tool that accepts version-controllable text files and provisions infrastructure based upon the content of those text files.  It is able to provision infrastructure from many different [providers](https://www.terraform.io/docs/providers/index.html), including:
+Terraform is a command line tool that reads version-controllable text files in a directory and provisions infrastructure based upon the content of those text files.  It is able to provision infrastructure from many different [providers](https://www.terraform.io/docs/providers/index.html), including:
 *   [Amazon Web Services](https://www.terraform.io/docs/providers/aws/index.html)
 *   [Google Cloud Platform](https://www.terraform.io/docs/providers/google/index.html)
 *   [vSphere, including vCenter Server and ESXi](https://www.terraform.io/docs/providers/vsphere/index.html)
@@ -24,12 +24,14 @@ The Terraform workflow includes these steps:
 *   Execute `terraform init` once to download required providers.
 *   Execute `terraform plan` on the files in the directory.  This verifies the syntax in the source files, and produces a report of what changes Terraform will implement.
 *   Execute `terraform apply` on the files in the directory.  This causes the infrastructure described in the source files to be provisioned.
+    *   You will be prompted to confirm the intent to apply changes.
     *   As infrastructure is successfully provisioned, Terraform creates a 'state file' that describes the state of the infrastructure from a provisioning perspective.
 *   Push Terraform code and state files to version control.  
     *   You want the master branch to represent what is deployed.
 *   Implement changes to Terraform source files to implement changes to infrastructure.  This requires successive applications of `terraform plan` and `terraform apply`.    
 *   Rigorously capture changes to Terraform source and state files to version control.
 *   Execute `terraform destroy` to delete all the resources created by the terraform files in the directory.
+    *   You will be prompted to confirm the intent to destroy.
  
 ### Team Usage
 The workflow described above would work well for a team of one diligent person.  In that context, there would be no notion of these types of problems:
@@ -76,7 +78,7 @@ When working with a new technology, there is no substitute for examples of worki
 Terraform implements a module architecture that allows code that is common between, say, environments to be implemented in a common module.  Specialization is acheived using input parameters (see var.tf above).
 
 ### Solving Harder Problems
-Terraform implements a plugin architecture that implements Copy-Read-Update-Delete (CRUD) interface functions in Go.  Development of Terraform plugins is atypical, but the task does not seem daunting.  There are numerous examples of Open Source plugin code.
+Terraform implements a plugin architecture that implements Copy-Read-Update-Delete (CRUD) interface functions in the Go language.  Development of Terraform plugins is atypical, but the task does not appear to be daunting.  There are numerous examples of Open Source Terraform plugin code.
 
 ### Kubernetes
 Terraform implements a [Kubernetes provider](https://www.terraform.io/docs/providers/kubernetes/index.html). 
@@ -132,7 +134,7 @@ As always, there will difficulties associated with the usual suspects:
 ## Proposal - How We Could Replace vCommander With Terraform
 It would be great if we could use Terraform to create infrastructure using generic descriptions, i.e.: 
 *   Build an Ubuntu test server on AWS.
-*   Build a fleet of four web servers load-balanced by an Nginx instance in the 990 datacenter.
+*   Build a fleet of N web servers load-balanced by an Nginx instance in the 990 datacenter.
 *   Build a Big Query endpoint on GCP.  
 
 This section provides a high-level description of how we might replace vCommander with Terraform as an infrastructure provisioning tool.
@@ -147,6 +149,8 @@ Steps in this process could include:
 *   Find a way to convert existing vCommander builds to Terraform states (keep the Nobel committee in the loop for this). 
 
 ### Migration Decisions
+*   Golden Images versus cloud-init configuration?
+    *   Golden Images will still require configuration for DNS/Hostname specification.
 *   If we are moving onto Terraform, what current infrastructure definitions should be moved to Terraform?
     *   vCenter virtual machines?
         *   Yes, because they were created by vCommander.
