@@ -12,12 +12,6 @@ resource "aws_instance" "example" {
     Name = "Created by doer using Terraform"
   }
 
-  user_data = <<-EOF
-    #!/bin/bash
-    echo "Hello, World" > index.html
-    nohup busybox httpd -f -p 8080 &
-    EOF     
-
   vpc_security_group_ids = ["${aws_security_group.instance.id}"]
 }
 
