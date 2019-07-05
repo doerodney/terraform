@@ -77,7 +77,7 @@ When working with a new technology, there is no substitute for examples of worki
 ### Modules
 Terraform implements a module architecture that allows code that is common between, say, environments to be implemented in a common module.  Specialization is acheived using input parameters (see var.tf above).
 
-### Solving Harder Problems
+### Solving Harder Problems with Plugins
 Terraform implements a plugin architecture that implements Copy-Read-Update-Delete (CRUD) interface functions in the Go language.  Development of Terraform plugins is atypical, but the task does not appear to be daunting.  There are numerous examples of Open Source Terraform plugin code.
 
 ### Kubernetes
@@ -87,7 +87,8 @@ Terraform implements a [Kubernetes provider](https://www.terraform.io/docs/provi
 Terraform does not come with a configuration management system.  Terraform provisions the infrastructure, then it is necessary to delegate to a configuration management system.
 
 In AWS, it is possible using CloudFormation to define an AWS::CloudFormation::Init object that contains metadata that is used to configure the instance upon completion of provisioning.  To do this, it is necessary to: 
-*       Define the metadata and add it as the Metadata attribute on the AWS::EC2::Instance object.
+*       Define the metadata
+*       Add it as the Metadata attribute on the AWS::EC2::Instance object.
 *       Define the UserData attribute on the AWS::EC2::Instance to invoke the cfn-init utility, which would interpret the metatdata content to: 
         *       Install packages
         *       Create groups
@@ -99,7 +100,7 @@ In AWS, it is possible using CloudFormation to define an AWS::CloudFormation::In
 
 In AWS, this cfn-init process is available for Linux and Windows. 
 
-Terraform does not implement this exact functionality.  Instead, it implements [cloud-init](https://cloudinit.readthedocs.io/en/latest/index.html) to do the post-provision configuration as part of its [template_cloudinit_config data source](https://www.terraform.io/docs/providers/template/d/cloudinit_config.html).  This enables these tasks to be performed by cloud-init:
+Terraform does not implement this exact functionality.  Instead, it implements [cloud-init](https://cloudinit.readthedocs.io/en/latest/index.html) to do the post-provision configuration as part of its [template_cloudinit_config data source](https://www.terraform.io/docs/providers/template/d/cloudinit_config.html).  These tasks can be performed by cloud-init:
 *       Install packages with apt or yum.
 *       Add users and groups
 *       Install arbitrary packages
@@ -110,7 +111,7 @@ Terraform does not implement this exact functionality.  Instead, it implements [
 
 See the [cloud-init Cloud config examples](https://cloudinit.readthedocs.io/en/latest/topics/examples.html#) for additional capabilities and examples.
 
-It should be noted that cloud-init natively supports the usual Linux distributions.  It does not natively support Windows.  However, [Cloudbase-Init](https://cloudbase.it/cloudbase-init/) is an Open Source project that purports to be the Windows equivalent of cloud-init.  This demonstrates [Windows cloudbase-init usage on VMware](https://blogs.vmware.com/management/2019/01/windows-cloud-init-solution.html).  Commercial support for cloudbase-init is available.  
+It should be noted that cloud-init natively supports the usual Linux distributions.  It does not natively support Windows.  However, [Cloudbase-Init](https://cloudbase.it/cloudbase-init/) is an Open Source project that purports to be the Windows equivalent of cloud-init.  This link demonstrates [Windows cloudbase-init usage on VMware](https://blogs.vmware.com/management/2019/01/windows-cloud-init-solution.html).  Commercial support for cloudbase-init is available.  
 
 #### Other Options for Post-Provision Configuration
 Terraform implements a provider for [Chef](https://www.terraform.io/docs/providers/chef/index.html).  This provider enables specification of a Chef run list to execute.
@@ -150,7 +151,7 @@ Steps in this process could include:
 
 ### Migration Decisions
 *   Golden Images versus cloud-init configuration?
-    *   Golden Images will still require configuration for DNS/Hostname specification.
+    *   Golden Images will still require per-server configuration, i.e.,  for DNS/Hostname specification.
 *   If we are moving onto Terraform, what current infrastructure definitions should be moved to Terraform?
     *   vCenter virtual machines?
         *   Yes, because they were created by vCommander.
@@ -159,8 +160,8 @@ Steps in this process could include:
     *   Resources deployed by Serverless, such as Lambda function definitions?
         *   Lowest priority.  Serverless, with its dockerize_* setting, adds value.
 
-### Standard Infrastructure Configurationss
-In soccer, a set piece is a pre-conceived play that a team polishes well in advance.  This is a valid analogy for infrustructure provisioning - identify the tasks that you will do most frequently, and have a polished response ready.  In this case, the polished response would be a Terraform module, all tested and ready to deploy.
+### Standard Infrastructure Configurations
+In soccer, a set piece is a pre-conceived play that a team polishes well in advance.  This is a valid analogy for infrustructure provisioning - identify the tasks that you will do most frequently, and have a polished response ready.  In this case, the polished response would be a Terraform configuration, implemented as a module, and specialized by parameters.
 
 To identify the most common configurations:
 *   Review existing deployments.
@@ -177,8 +178,13 @@ Examples of infrastructure configurations include:
 *   Load-balanced web server fleet
 *   Database server
 
-### Develop an Allotment Tracker
-This service would track a team's infrastructure allotment, and approve or disapprove an infrastructure build request.  Implementation in a highly-available database such as DynamoDB would be appropriate.  Upon completion of an apply or destroy task, it would update the team's allotment accordingly.
+### Develop an Allotment Manager
+This service would:
+*       Monitor a request's terraform plan execution. 
+*       Incorporate the plan execution into team's current infrastructure allotment to determine if the request exceeds the team's allotment.
+*       Approve or disapprove an infrastructure build request.  
+       
+Implementation in a highly-available database such as DynamoDB would be appropriate.  Upon completion of an apply or destroy task, it would update the team's allotment accordingly.
 
 ### Develop a Build Process
 This is the important component that changes a user's minimally detailed request into a specific build request.  This process:
@@ -197,21 +203,17 @@ Envision a directory structure that implements a subdirectory for each team.  Th
 ### Transfer Management of Existing Infrastructure into Terraform
 The key idea is to convert knowledge of infrastructure created by vCommander or CloudFormation to Terraform files (source and state). 
 
-Terraform is able to [import existing infrastructure](https://www.terraform.io/docs/import/).  This process requires creation of a resource configuration block, to which the imported object will be mapped.  This is not a big deal as these are most likely going to be supported by newly-developed standard configurations.
+Terraform is able to [import existing infrastructure](https://www.terraform.io/docs/import/).  This process requires creation of a resource configuration block, to which the imported object will be mapped.  The resource configuration will most likely going to be supported by newly-developed standard configurations.
 
 The documentation on this feature indicates that a future version of Terraform will fully generate configuration.  It's on their radar.
    
-a REST endpoint (with excellent documentation), and then add a front end (Jenkins, GitLab CICD, whatever) as necessary. 
 
 ### Develop an onboarding process
 Envision a directory structure that implements a subdirectory for each team.  Subdirectories under each team directory would be created for each supported environment (prod, stage, dev, whatever), and under that, the directories for each configuration (a large set of team/environment/configuration hierarchy members).  The primary role of the onboarding process would be to:
 *   Create a directory structure of configurations for this team.
-*   Create Terraform state files from the team's existing infrastructure created by vCommander/AWS/GCP.
+*   Create Terraform state files from the team's existing infrastructure created by:
+    *   vCommander
+    *   AWS
+    *   GCP
 
-### Transfer Management of Existing Infrastructure into Terraform
-The key idea is to convert knowledge of infrastructure created by vCommander or CloudFormation to Terraform files (source and state). 
-
-Terraform is able to [import existing infrastructure](https://www.terraform.io/docs/import/).  This process requires creation of a resource configuration block, to which the imported object will be mapped.  This is not a big deal as these are most likely going to be supported by newly-developed standard configurations.
-
-The documentation on this feature indicates that a future version of Terraform will fully generate configuration.  It's on their radar.
    
