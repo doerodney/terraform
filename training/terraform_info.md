@@ -149,6 +149,13 @@ Steps in this process could include:
 *   Develop an onboarding process.
 *   Find a way to convert existing vCommander builds to Terraform states (keep the Nobel committee in the loop for this). 
 
+### Known Unknowns
+This section describes facets of this problem that we do not yet comprehend.
+
+#### Cloud Provider Account Management
+This document proposes a centralized build service.  How can a team's cloud provider credentials (supplied by Okta) be granted to a centralized build service?
+
+
 ### Migration Decisions
 *   Golden Images versus cloud-init configuration?
     *   Golden Images will still require per-server configuration, i.e.,  for DNS/Hostname specification.
