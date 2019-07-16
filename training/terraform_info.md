@@ -69,7 +69,7 @@ Terraform operates on all terraform files (files with a .tf extension) in a dire
     *   s3     
 
 ### Example Code
-When working with a new technology, there is no substitute for examples of working code.  To Learn a new technology is frequently a monkey-see-monkey-do process.  The Hashicorp site has numerous examples of working code for different providers:
+When working with a new technology, there is no substitute for examples of working code.  To learn a new technology is frequently a monkey-see-monkey-do process.  The Hashicorp site has numerous examples of working code for different providers:
 *   [AWS](https://www.terraform.io/docs/providers/aws/r/instance.html)
 *   [GCP](https://www.terraform.io/docs/providers/google/d/datasource_compute_instance.html) 
 *   [vSphere](https://www.terraform.io/docs/providers/vsphere/index.html)
@@ -106,7 +106,7 @@ Terraform does not implement this exact functionality.  Instead, it implements [
 *       Install arbitrary packages
 *       Create arbitrary files
 *       Run commands on first boot
-        *       Command could include commands to configure services
+        *       Could include commands to configure services
 *       Install and run Chef recipes
 
 See the [cloud-init Cloud config examples](https://cloudinit.readthedocs.io/en/latest/topics/examples.html#) for additional capabilities and examples.
@@ -213,14 +213,4 @@ The key idea is to convert knowledge of infrastructure created by vCommander or 
 Terraform is able to [import existing infrastructure](https://www.terraform.io/docs/import/).  This process requires creation of a resource configuration block, to which the imported object will be mapped.  The resource configuration will most likely going to be supported by newly-developed standard configurations.
 
 The documentation on this feature indicates that a future version of Terraform will fully generate configuration.  It's on their radar.
-   
-
-### Develop an onboarding process
-Envision a directory structure that implements a subdirectory for each team.  Subdirectories under each team directory would be created for each supported environment (prod, stage, dev, whatever), and under that, the directories for each configuration (a large set of team/environment/configuration hierarchy members).  The primary role of the onboarding process would be to:
-*   Create a directory structure of configurations for this team.
-*   Create Terraform state files from the team's existing infrastructure created by:
-    *   vCommander
-    *   AWS
-    *   GCP
-
    
